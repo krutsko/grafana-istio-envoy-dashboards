@@ -1,0 +1,155 @@
+name: Generate and Release Dashboards
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - '**/*.libsonnet'
+      - '.github/workflows/release-dashboards.yml'
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
+
+# Add permissions block
+permissions:
+  contents: write  # Required for creating releases and pushing tags
+
+jobs:
+  generate-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 1  # Shallow clone
+          fetch-tags: true  # Fetch all tags
+        
+      - name: Install jsonnet
+        run: |
+          # Install jsonnet using go install (most reliable method)
+          echo "Installing jsonnet via go install..."
+          go install github.com/google/go-jsonnet/cmd/jsonnet@v0.20.0
+          go install github.com/google/go-jsonnet/cmd/jsonnetfmt@v0.20.0
+          
+          # Install jsonnet-bundler
+          echo "Installing jsonnet-bundler..."
+          go install github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@v0.5.1
+          
+          # Add Go bin to PATH
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+          
+          # Verify installation (will work in next step due to PATH update)
+          echo "Jsonnet installation completed"
+          
+      - name: Setup vendor dependencies
+        run: |
+          # Initialize jsonnet-bundler if jsonfile.jsonnet doesn't exist
+          if [ ! -f "jsonnetfile.json" ]; then
+            jb init
+          fi
+          
+          # Install dependencies
+          jb install
+          
+      - name: Generate dashboards
+        run: |
+          # Verify jsonnet is available
+          jsonnet --version
+          
+          echo "Generating istio-envoy-clusters dashboard..."
+          jsonnet -J . -J vendor istio-envoy-clusters.libsonnet > istio-envoy-clusters.json
+          
+          echo "Generating istio-envoy-listeners dashboard..."
+          jsonnet -J . -J vendor istio-envoy-listeners.libsonnet > istio-envoy-listeners.json
+          
+          # Verify files were created
+          ls -la *.json
+          echo "Dashboard generation completed successfully"
+          
+      - name: Validate JSON files
+        run: |
+          # Basic JSON validation
+          echo "Validating generated JSON files..."
+          for file in *.json; do
+            if jq empty "$file"; then
+              echo "✓ $file is valid JSON"
+            else
+              echo "✗ $file is invalid JSON"
+              exit 1
+            fi
+          done
+          
+      - name: Determine version bump
+        id: version
+        run: |
+          # Fetch all tags explicitly
+          git fetch --tags
+          
+          # Get the latest tag
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n1)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
+          echo "Latest tag: $LATEST_TAG"
+          
+          # Get all commit messages since last tag or all commits if no tags
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            COMMIT_MSGS=$(git log --pretty=format:"%s")
+          else
+            COMMIT_MSGS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s")
+          fi
+          
+          # Remove 'v' prefix for version calculation
+          VERSION=${LATEST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          
+          # Determine version bump based on conventional commit
+          if echo "$COMMIT_MSGS" | grep -qE "^(feat|feature)(\(.+\))?!:|^BREAKING CHANGE:|!:"; then
+            # Major version bump for breaking changes
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+            BUMP_TYPE="major"
+          elif echo "$COMMIT_MSGS" | grep -qE "^feat(\(.+\))?:"; then
+            # Minor version bump for features
+            MINOR=$((MINOR + 1))
+            PATCH=0
+            BUMP_TYPE="minor"
+          elif echo "$COMMIT_MSGS" | grep -qE "^(fix|perf)(\(.+\))?:"; then
+            # Patch version bump for fixes and performance
+            PATCH=$((PATCH + 1))
+            BUMP_TYPE="patch"
+          else
+            # No version bump for other commit types
+            echo "No version bump needed for this commit type"
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION (${BUMP_TYPE} bump)"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "should_release=true" >> $GITHUB_OUTPUT
+          
+      - name: Create and push tag
+        if: steps.version.outputs.should_release == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag ${{ steps.version.outputs.new_version }}
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git push origin ${{ steps.version.outputs.new_version }}
+          
+      - name: Create Release
+        if: steps.version.outputs.should_release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.version.outputs.new_version }} \
+            --title "${{ steps.version.outputs.new_version }}" \
+            --generate-notes \
+            istio-envoy-clusters.json \
+            istio-envoy-listeners.json
+          
