@@ -11,13 +11,32 @@ local listener_stats_queries = import 'lib/listener_stats_queries.libsonnet';
 local listener_manager_queries = import 'lib/listener_manager_queries.libsonnet';
 local lds_stats_queries = import 'lib/lds_stats_queries.libsonnet';
 
-g.dashboard.new('Istio Envoy Clusters')
+// Create base dashboard first
+local baseDashboard = g.dashboard.new('Istio Envoy Clusters')
 + g.dashboard.withDescription(|||
   Dashboard showing Istio Envoy Clusters
 |||)
 + g.dashboard.graphTooltip.withSharedCrosshair()
 + g.dashboard.withVariables([
-  variables.datasource,
+  // Fixed datasource variable for external sharing
+  {
+    name: 'datasource',
+    type: 'datasource',
+    query: 'prometheus',
+    current: {
+      selected: false,
+      text: 'Prometheus',
+      value: 'Prometheus'
+    },
+    hide: 0,
+    includeAll: false,
+    multi: false,
+    options: [],
+    refresh: 1,
+    regex: '',
+    skipUrlSync: false,
+    label: 'Data Source'
+  },
   {
     name: 'clusterNameLabel',
     type: 'custom',
@@ -28,7 +47,18 @@ g.dashboard.new('Istio Envoy Clusters')
     definition: 'cluster_name',
     query: 'cluster_name',
     hide: 2,
-    options: [],
+    options: [
+      {
+        selected: true,
+        text: 'cluster_name',
+        value: 'cluster_name'
+      }
+    ],
+    current: {
+      selected: false,
+      text: 'cluster_name',
+      value: 'cluster_name'
+    },
     regex: '',
     skipUrlSync: false,
     multi: false,
@@ -126,12 +156,23 @@ g.dashboard.new('Istio Envoy Clusters')
     type: 'custom',
     datasource: {
       type: 'prometheus',
-      uid: '$datasource'
+      uid: '${datasource}'
     },
     definition: '0.9',
     query: '0.9',
     hide: 2,
-    options: [],
+    options: [
+      {
+        selected: true,
+        text: '0.9',
+        value: '0.9'
+      }
+    ],
+    current: {
+      selected: false,
+      text: '0.9',
+      value: '0.9'
+    },
     regex: '',
     skipUrlSync: false,
     multi: false,
@@ -237,7 +278,7 @@ g.dashboard.new('Istio Envoy Clusters')
     ])       
   ], panelWidth=8)
 )
-+ g.dashboard.withUid(std.md5('[SK] Istio Envoy Clusters'))
++ g.dashboard.withUid('')  // Empty UID for sharing
 + g.dashboard.time.withFrom('now-1h')
 + g.dashboard.time.withTo('now')
 + g.dashboard.timepicker.withRefreshIntervals([
@@ -251,4 +292,50 @@ g.dashboard.new('Istio Envoy Clusters')
   '1h',
   '2h',
   '1d'
-])
+]);
+
+// Simply add the required external sharing fields
+baseDashboard + {
+  // Required for grafana.com uploads
+  '__inputs': [
+    {
+      name: 'DS_PROMETHEUS',
+      label: 'Prometheus',
+      description: '',
+      type: 'datasource',
+      pluginId: 'prometheus',
+      pluginName: 'Prometheus'
+    }
+  ],
+  '__elements': {},
+  '__requires': [
+    {
+      type: 'grafana',
+      id: 'grafana',
+      name: 'Grafana',
+      version: '11.4.0'
+    },
+    {
+      type: 'datasource',
+      id: 'prometheus', 
+      name: 'Prometheus',
+      version: '1.0.0'
+    },
+    {
+      type: 'panel',
+      id: 'stat',
+      name: 'Stat',
+      version: ''
+    },
+    {
+      type: 'panel',
+      id: 'timeseries',
+      name: 'Time series', 
+      version: ''
+    }
+  ],
+  // Reset for sharing
+  id: null,
+  uid: '',
+  version: 0
+}

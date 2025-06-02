@@ -8,13 +8,32 @@ local queries = import 'lib/queries.libsonnet';
 local server_stats_queries = import 'lib/server_stats_queries.libsonnet';
 local http_conn_manager_queries = import 'lib/http_conn_manager_queries.libsonnet';
 
-g.dashboard.new('Istio Envoy HTTP Connection Manager')
+// Create base dashboard first
+local baseDashboard = g.dashboard.new('Istio Envoy HTTP Connection Manager')
 + g.dashboard.withDescription(|||
   Dashboard showing Istio Envoy HTTP Connection Manager metrics
 |||)
 + g.dashboard.graphTooltip.withSharedCrosshair()
 + g.dashboard.withVariables([
-  variables.datasource,
+  // Fixed datasource variable for external sharing
+  {
+    name: 'datasource',
+    type: 'datasource',
+    query: 'prometheus',
+    current: {
+      selected: false,
+      text: 'Prometheus',
+      value: 'Prometheus'
+    },
+    hide: 0,
+    includeAll: false,
+    multi: false,
+    options: [],
+    refresh: 1,
+    regex: '',
+    skipUrlSync: false,
+    label: 'Data Source'
+  },
   {
     name: 'Namespace',
     type: 'query',
@@ -40,7 +59,7 @@ g.dashboard.new('Istio Envoy HTTP Connection Manager')
     allowCustomValue: true,
     datasource: {
       type: 'prometheus',
-      uid: '$datasource'
+      uid: '${datasource}'
     },
     definition: 'query_result(sum({namespace="$Namespace",__name__="envoy_server_version"}) by (pod))',
     query: {
@@ -60,7 +79,7 @@ g.dashboard.new('Istio Envoy HTTP Connection Manager')
     type: 'query',
     datasource: {
       type: 'prometheus',
-      uid: '$datasource'
+      uid: '${datasource}'
     },
     definition: 'query_result(sum({namespace="$Namespace",__name__="envoy_server_version", pod=~"$app-.*"}) by (pod))',
     query: {
@@ -81,7 +100,7 @@ g.dashboard.new('Istio Envoy HTTP Connection Manager')
     type: 'query',
     datasource: {
       type: 'prometheus',
-      uid: '$datasource'
+      uid: '${datasource}'
     },
     definition: 'label_values(envoy_http_downstream_cx_total{namespace="$Namespace",pod=~"$pod"},http_conn_manager_prefix)',
     query: 'label_values(envoy_http_downstream_cx_total{namespace="$Namespace",pod=~"$pod"},http_conn_manager_prefix)',
@@ -100,12 +119,23 @@ g.dashboard.new('Istio Envoy HTTP Connection Manager')
     type: 'custom',
     datasource: {
       type: 'prometheus',
-      uid: '$datasource'
+      uid: '${datasource}'
     },
     definition: '0.9',
     query: '0.9',
     hide: 2,
-    options: [],
+    options: [
+      {
+        selected: true,
+        text: '0.9',
+        value: '0.9'
+      }
+    ],
+    current: {
+      selected: false,
+      text: '0.9',
+      value: '0.9'
+    },
     regex: '',
     skipUrlSync: false,
     multi: false,
@@ -159,7 +189,7 @@ g.dashboard.new('Istio Envoy HTTP Connection Manager')
     ]),
   ], panelWidth=8)
 )
-+ g.dashboard.withUid(std.md5('Istio Envoy HTTP Connection Manager'))
++ g.dashboard.withUid('')  // Empty UID for sharing
 + g.dashboard.time.withFrom('now-1h')
 + g.dashboard.time.withTo('now')
 + g.dashboard.timepicker.withRefreshIntervals([
@@ -173,4 +203,56 @@ g.dashboard.new('Istio Envoy HTTP Connection Manager')
   '1h',
   '2h',
   '1d'
-]) 
+]);
+
+// Simply add the required external sharing fields
+baseDashboard + {
+  // Required for grafana.com uploads
+  '__inputs': [
+    {
+      name: 'DS_PROMETHEUS',
+      label: 'Prometheus',
+      description: 'Prometheus data source',
+      type: 'datasource',
+      pluginId: 'prometheus',
+      pluginName: 'Prometheus'
+    }
+  ],
+  '__elements': {},
+  '__requires': [
+    {
+      type: 'grafana',
+      id: 'grafana',
+      name: 'Grafana',
+      version: '11.4.0'
+    },
+    {
+      type: 'datasource',
+      id: 'prometheus', 
+      name: 'Prometheus',
+      version: '1.0.0'
+    },
+    {
+      type: 'panel',
+      id: 'stat',
+      name: 'Stat',
+      version: ''
+    },
+    {
+      type: 'panel',
+      id: 'timeseries',
+      name: 'Time series', 
+      version: ''
+    },
+    {
+      type: 'panel',
+      id: 'text',
+      name: 'Text',
+      version: ''
+    }
+  ],
+  // Reset for sharing
+  id: null,
+  uid: '',
+  version: 0
+}
