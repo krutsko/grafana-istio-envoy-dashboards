@@ -190,7 +190,7 @@ g.dashboard.new('Istio Envoy Clusters')
         panels.timeSeries.rate('Retry success', envoy_cluster_upstream_queries.envoy_cluster_upstream_rq_retry_success),
         panels.timeSeries.rate('Retry overflow', envoy_cluster_upstream_queries.envoy_cluster_upstream_rq_retry_overflow),
     ]),     
-    row.new('HTTP Metrics')
+    row.new('HTTP Metrics By Cluster')
     + row.withCollapsed(true)
     + row.withPanels([
         panels.timeSeries.rate('Upstream Requests by Response Code Class', envoy_cluster_upstream_queries.envoy_cluster_upstream_rq_by_code),

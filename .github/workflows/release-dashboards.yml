@@ -63,6 +63,9 @@ jobs:
           echo "Generating istio-envoy-listeners dashboard..."
           jsonnet -J . -J vendor istio-envoy-listeners.libsonnet > istio-envoy-listeners.json
           
+          echo "Generating istio-envoy-http-conn-manager dashboard..."
+          jsonnet -J . -J vendor istio-envoy-http-conn-manager.libsonnet > istio-envoy-http-conn-manager.json
+          
           # Verify files were created
           ls -la *.json
           echo "Dashboard generation completed successfully"
@@ -151,5 +154,6 @@ jobs:
             --title "${{ steps.version.outputs.new_version }}" \
             --generate-notes \
             istio-envoy-clusters.json \
-            istio-envoy-listeners.json
+            istio-envoy-listeners.json \
+            istio-envoy-http-conn-manager.json
           

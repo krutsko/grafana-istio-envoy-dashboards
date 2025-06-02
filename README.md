@@ -45,4 +45,5 @@ jb install
 ```bash
 jsonnet -J . -J vendor istio-envoy-clusters.libsonnet > istio-envoy-clusters.json
 jsonnet -J . -J vendor istio-envoy-listeners.libsonnet > istio-envoy-listeners.json
+jsonnet -J . -J vendor istio-envoy-http-conn-manager.libsonnet > istio-envoy-http-conn-manager.json
 ```

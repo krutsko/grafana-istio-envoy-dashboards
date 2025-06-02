@@ -53,3 +53,4 @@ charts/gateway-addons-helm/dashboards/vendor/
 jsonnetfile.lock.json
 istio-envoy-clusters.json
 istio-envoy-listeners.json
+istio-envoy-http-conn-manager.json
