@@ -6,7 +6,7 @@ For more information about Envoy stats in Istio, see the [official Istio documen
 
 ## Download Dashboards
 
-The dashboards are available at: https://github.com/krutsko/private-istio-envoy-dashboards/releases
+The dashboards are available at: https://github.com/krutsko/grafana-istio-envoy-dashboards/releases
 
 You can download the JSON files directly from the releases page and import them into Grafana.
 
@@ -14,15 +14,23 @@ You can download the JSON files directly from the releases page and import them 
 
 ### istio-envoy-clusters.json
 - Server stats (uptime, memory, connections)
+- Cluster manager metrics (active/warming clusters, updates)
 - Cluster stats (requests, timeouts, retries)
-- HTTP metrics (response codes, errors)
-- Connection stats (connections, failures, bytes)
+- HTTP metrics by cluster (response codes, errors)
+- Connection stats (HTTP/1.1/2/3, failures, bytes)
 
 ### istio-envoy-listeners.json
 - Server stats (uptime, memory, connections)
-- Listener stats (active/draining listeners)
-- HTTP response codes
-- Connection manager stats (connections, requests, timing)
+- Listener manager metrics (active/draining/warming listeners)
+- Listener discovery service (LDS) stats
+
+### istio-envoy-http-conn-manager.json
+- Server stats (uptime, memory, connections)
+- HTTP response codes (by class and individual codes)
+- HTTP connection manager stats
+- Connection and request metrics
+- Protocol errors and timing stats
+- Bytes transmitted/received
 
 ## Generate Dashboards Locally
 
