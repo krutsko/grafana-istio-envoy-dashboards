@@ -10,6 +10,22 @@ The dashboards are available at: https://github.com/krutsko/grafana-istio-envoy-
 
 You can download the JSON files directly from the releases page and import them into Grafana.
 
+## Install from Grafana.com
+
+You can also install these dashboards directly from Grafana.com:
+
+| Dashboard | ID | Grafana.com URL |
+|-----------|----|----|
+| Istio Envoy Clusters | 23502 | https://grafana.com/grafana/dashboards/23502-istio-envoy-clusters/ |
+| Istio Envoy Listeners | 23501 | https://grafana.com/grafana/dashboards/23501-istio-envoy-listeners/ |
+| Istio Envoy HTTP Connection Manager | 23503 | https://grafana.com/grafana/dashboards/23503-istio-envoy-http-connection-manager/ |
+
+To install from Grafana.com:
+1. Go to your Grafana instance
+2. Navigate to **Dashboards** → **New** → **Import**
+3. Enter the dashboard ID (e.g., `23503`) in the **Import via grafana.com** field
+4. Click **Load** and follow the import wizard
+
 ## What's in the Dashboards?
 
 ### istio-envoy-clusters.json
