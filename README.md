@@ -19,6 +19,7 @@ You can also install these dashboards directly from Grafana.com:
 | Istio Envoy Clusters | 23502 | https://grafana.com/grafana/dashboards/23502-istio-envoy-clusters/ |
 | Istio Envoy Listeners | 23501 | https://grafana.com/grafana/dashboards/23501-istio-envoy-listeners/ |
 | Istio Envoy HTTP Connection Manager | 23503 | https://grafana.com/grafana/dashboards/23503-istio-envoy-http-connection-manager/ |
+| Istio Envoy Outlier Detection | 23965 | https://grafana.com/grafana/dashboards/23965-istio-envoy-outlier-detection/ |
 
 To install from Grafana.com:
 1. Go to your Grafana instance
@@ -47,6 +48,16 @@ To install from Grafana.com:
 - Connection and request metrics
 - Protocol errors and timing stats
 - Bytes transmitted/received
+
+### istio-envoy-outlier-detection.json
+- Outlier detection overview (enforced ejections, currently ejected hosts)
+- Consecutive 5xx ejections (enforced and detected)
+- Success rate ejections (enforced and detected)
+- Gateway failure ejections (enforced and detected)
+- Local origin failure ejections (enforced and detected)
+- Local origin success rate ejections (enforced and detected)
+- Failure percentage ejections (enforced and detected)
+- Local origin failure percentage ejections (enforced and detected)
 
 ## Generate Dashboards Locally
 
