@@ -66,6 +66,9 @@ jobs:
           echo "Generating istio-envoy-http-conn-manager dashboard..."
           jsonnet -J . -J vendor istio-envoy-http-conn-manager.libsonnet > istio-envoy-http-conn-manager.json
           
+          echo "Generating istio-envoy-outlier-detection dashboard..."
+          jsonnet -J . -J vendor istio-envoy-outlier-detection.libsonnet > istio-envoy-outlier-detection.json
+          
           # Verify files were created
           ls -la *.json
           echo "Dashboard generation completed successfully"
@@ -155,5 +158,6 @@ jobs:
             --generate-notes \
             istio-envoy-clusters.json \
             istio-envoy-listeners.json \
-            istio-envoy-http-conn-manager.json
+            istio-envoy-http-conn-manager.json \
+            istio-envoy-outlier-detection.json
           
