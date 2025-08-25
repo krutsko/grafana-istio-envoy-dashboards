@@ -70,4 +70,5 @@ jb install
 jsonnet -J . -J vendor istio-envoy-clusters.libsonnet > istio-envoy-clusters.json
 jsonnet -J . -J vendor istio-envoy-listeners.libsonnet > istio-envoy-listeners.json
 jsonnet -J . -J vendor istio-envoy-http-conn-manager.libsonnet > istio-envoy-http-conn-manager.json
+jsonnet -J . -J vendor istio-envoy-outlier-detection.libsonnet > istio-envoy-outlier-detection.json
 ```
