@@ -118,11 +118,11 @@ local baseDashboard = g.dashboard.new('Istio Envoy Outlier Detection')
     },
     regex: '/pod="([^"]+)"/',
     multi: true,
-    includeAll: false,
+    includeAll: true,
     refresh: 2,
     sort: 1,
     options: [],
-    allValue: '.*',
+    allValue: '$app.*',
   },
   {
     name: 'cluster',

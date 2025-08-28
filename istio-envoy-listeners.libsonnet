@@ -92,11 +92,11 @@ local baseDashboard = g.dashboard.new('Istio Envoy Listeners')
     },
     regex: '/pod="([^"]+)"/',
     multi: true,
-    includeAll: false,
+    includeAll: true,
     refresh: 2,
     sort: 1,
     options: [],
-    allValue: '.*',
+    allValue: '$app.*',
   },
   {
     name: 'quantiles',

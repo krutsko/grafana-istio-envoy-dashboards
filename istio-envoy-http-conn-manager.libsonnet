@@ -89,11 +89,11 @@ local baseDashboard = g.dashboard.new('Istio Envoy HTTP Connection Manager')
     },
     regex: '/pod="([^"]+)"/',
     multi: true,
-    includeAll: false,
+    includeAll: true,
     refresh: 2,
     sort: 1,
     options: [],
-    allValue: '.*',
+    allValue: '$app.*',
   },
   {
     name: 'http_conn_manager_prefix',
